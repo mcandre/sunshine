@@ -35,13 +35,10 @@ FreeBSD
 
 carrots follows classical UNIX CLI conventions: Basic exit codes, and no output except in case of an issue.
 
-By default, `carrots` analyzes the current working directory tree. To analyze other paths, list some files and/or directories explicitly:
+By default, `carrots` analyzes the current working directory tree. To analyze other paths, list some files and/or directories explicitly. For example, to scan your live SSH directory tree:
 
 ```console
-$ carrots .ssh/authorized_keys .ssh/config .ssh/known_hosts
-
-$ carrots .ssh/id_test .ssh/id_test.pub
-.ssh/id_test: expected chmod 0600, got 0644
+$ carrots ~/.ssh
 ```
 
 🥕
