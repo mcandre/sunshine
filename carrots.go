@@ -1,8 +1,9 @@
 package carrots
 
 import (
-	"io"
+	"errors"
 	"fmt"
+	"io"
 	"path"
 	"path/filepath"
 	"os"
@@ -33,6 +34,17 @@ func NewScanner() (*Scanner, error) {
 	}
 
 	return &Scanner{Home: home}, nil
+}
+
+// ScanFileExists checks paths for existence.
+func (o Scanner) ScanFileExists(pth string, info os.FileInfo) error {
+	_, err := os.Stat(pth)
+
+	if errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("%s: not found", pth)
+	}
+
+	return nil
 }
 
 // ScanSSH analyzes .ssh directories.
@@ -132,6 +144,10 @@ func (o Scanner) ScanHome(pth string, info os.FileInfo) []string {
 // Walk traverses a file path recursively,
 // collecting known permission discrepancies.
 func (o *Scanner) Walk(pth string, info os.FileInfo, err error) error {
+	if err2 := o.ScanFileExists(pth, info); err2 != nil {
+		return err2
+	}
+
 	o.Warnings = append(o.Warnings, o.ScanSSH(pth, info)...)
 	o.Warnings = append(o.Warnings, o.ScanSSHConfig(pth, info)...)
 	o.Warnings = append(o.Warnings, o.ScanSSHKeys(pth, info)...)
@@ -143,40 +159,43 @@ func (o *Scanner) Walk(pth string, info os.FileInfo, err error) error {
 
 // Scan checks the given root file path recursively
 // for known permission discrepancies.
-func Scan(roots []string) ([]string, error) {
+func Scan(roots []string) ([]string, []error) {
 	scanner, err := NewScanner()
 
 	if err != nil {
-		return []string{}, err
+		return []string{}, []error{err}
 	}
 
-	for _, root := range roots {
-		err2 := filepath.Walk(root, scanner.Walk)
+	var errs []error
 
-		if err2 != nil && err2 != io.EOF {
-			return scanner.Warnings, err2
+	for _, root := range roots {
+		if err2 := filepath.Walk(root, scanner.Walk); err2 != nil && err2 != io.EOF {
+			errs = append(errs, err2)
 		}
 	}
 
-	return scanner.Warnings, nil
+	return scanner.Warnings, errs
 }
 
 // Report emits any warnings the console.
 // If warnings are present, returns 1.
 // Else, returns 0.
 func Report(roots []string) int {
-	warnings, err := Scan(roots)
+	warnings, errs := Scan(roots)
 
 	for _, warning := range warnings {
 		fmt.Println(warning)
 	}
 
-	if len(warnings) != 0 {
+	if len(errs) != 0 {
+		for _, err := range errs {
+			fmt.Println(err)
+		}
+
 		return 1
 	}
 
-	if err != nil {
-		fmt.Println(err)
+	if len(warnings) != 0 {
 		return 1
 	}
 
