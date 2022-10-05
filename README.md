@@ -16,7 +16,7 @@ carrots scans file paths for permission discrepancies. For example, SSH requires
 # INSTALL FROM SOURCE
 
 ```console
-$ go install github.com/mcandre/carrots/cmd/tug@latest
+$ go install github.com/mcandre/carrots/cmd/carrots@latest
 ```
 
 # RUNTIME REQUIREMENTS
