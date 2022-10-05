@@ -7,7 +7,14 @@ import (
 	"path"
 	"path/filepath"
 	"os"
+	"regexp"
 )
+
+// SSHKeyPattern matches SSH key filenames.
+var SSHKeyPattern = regexp.MustCompile("^id_.+$")
+
+// SSHPublicKeyPattern matches SSH public key filenames.
+var SSHPublicKeyPattern = regexp.MustCompile("^id_.+\\.pub$")
 
 // Scanner collects warnings.
 type Scanner struct {
@@ -38,6 +45,31 @@ func ScanSSHConfig(pth string, info os.FileInfo) []string {
 
 			if mode != 0400 {
 				return []string{fmt.Sprintf("%s: expected chmod 0400, got %04o", pth, mode)}
+			}
+		}
+	}
+
+	return []string{}
+}
+
+// ScanSSHKeys analyzes .ssh/id_.+(\.pub)? files.
+func ScanSSHKeys(pth string, info os.FileInfo) []string {
+	name := info.Name()
+
+	if SSHKeyPattern.MatchString(name) {
+		parent := path.Base(filepath.Dir(pth))
+
+		if parent == ".ssh" {
+			mode := info.Mode() % 01000
+
+			if SSHPublicKeyPattern.MatchString(name) {
+				if mode != 0644 {
+					return []string{fmt.Sprintf("%s: expected chmod 0644, got %04o", pth, mode)}
+				}
+			} else {
+				if mode != 0600 {
+					return []string{fmt.Sprintf("%s: expected chmod 0600, got %04o", pth, mode)}
+				}
 			}
 		}
 	}
@@ -76,6 +108,7 @@ func ScanKnownHosts(pth string, info os.FileInfo) []string {
 func (o *Scanner) Walk(pth string, info os.FileInfo, err error) error {
 	o.Warnings = append(o.Warnings, ScanSSH(pth, info)...)
 	o.Warnings = append(o.Warnings, ScanSSHConfig(pth, info)...)
+	o.Warnings = append(o.Warnings, ScanSSHKeys(pth, info)...)
 	o.Warnings = append(o.Warnings, ScanAuthorizedKeys(pth, info)...)
 	o.Warnings = append(o.Warnings, ScanKnownHosts(pth, info)...)
 
