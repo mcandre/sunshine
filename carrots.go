@@ -3,7 +3,6 @@ package carrots
 import (
 	"io"
 	"fmt"
-	"log"
 	"path"
 	"path/filepath"
 	"os"
@@ -20,10 +19,24 @@ var SSHPublicKeyPattern = regexp.MustCompile("^id_.+\\.pub$")
 type Scanner struct {
 	// Warnings denote an actionable permission discrepancy.
 	Warnings []string
+
+	// Home denotes the current user's home directory.
+	Home string
+}
+
+// NewScanner constructs a scanner.
+func NewScanner() (*Scanner, error) {
+	home, err := os.UserHomeDir()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &Scanner{Home: home}, nil
 }
 
 // ScanSSH analyzes .ssh directories.
-func ScanSSH(pth string, info os.FileInfo) []string {
+func (o Scanner) ScanSSH(pth string, info os.FileInfo) []string {
 	if info.Name() == ".ssh" {
 		mode := info.Mode() % 01000
 
@@ -36,7 +49,7 @@ func ScanSSH(pth string, info os.FileInfo) []string {
 }
 
 // ScanSSHConfig analyzes .ssh/config files.
-func ScanSSHConfig(pth string, info os.FileInfo) []string {
+func (o Scanner) ScanSSHConfig(pth string, info os.FileInfo) []string {
 	if info.Name() == "config" {
 		parent := path.Base(filepath.Dir(pth))
 
@@ -53,7 +66,7 @@ func ScanSSHConfig(pth string, info os.FileInfo) []string {
 }
 
 // ScanSSHKeys analyzes .ssh/id_.+(\.pub)? files.
-func ScanSSHKeys(pth string, info os.FileInfo) []string {
+func (o Scanner) ScanSSHKeys(pth string, info os.FileInfo) []string {
 	name := info.Name()
 
 	if SSHKeyPattern.MatchString(name) {
@@ -78,7 +91,7 @@ func ScanSSHKeys(pth string, info os.FileInfo) []string {
 }
 
 // ScanAuthorizedKeys analyzes authorized_keys files.
-func ScanAuthorizedKeys(pth string, info os.FileInfo) []string {
+func (o Scanner) ScanSSHAuthorizedKeys(pth string, info os.FileInfo) []string {
 	if info.Name() == "authorized_keys" {
 		mode := info.Mode() % 01000
 
@@ -91,7 +104,7 @@ func ScanAuthorizedKeys(pth string, info os.FileInfo) []string {
 }
 
 // ScanKnownHosts analyzes known_hosts files.
-func ScanKnownHosts(pth string, info os.FileInfo) []string {
+func (o Scanner) ScanSSHKnownHosts(pth string, info os.FileInfo) []string {
 	if info.Name() == "known_hosts" {
 		mode := info.Mode() % 01000
 
@@ -103,43 +116,65 @@ func ScanKnownHosts(pth string, info os.FileInfo) []string {
 	return []string{}
 }
 
+// ScanHome analyzes home directories.
+func (o Scanner) ScanHome(pth string, info os.FileInfo) []string {
+	if info.Name() == o.Home {
+		mode := info.Mode() % 01000
+
+		if mode != 0755 {
+			return []string{fmt.Sprintf("%s: expected chmod 0755, got %04o", pth, mode)}
+		}
+	}
+
+	return []string{}
+}
+
 // Walk traverses a file path recursively,
 // collecting known permission discrepancies.
 func (o *Scanner) Walk(pth string, info os.FileInfo, err error) error {
-	o.Warnings = append(o.Warnings, ScanSSH(pth, info)...)
-	o.Warnings = append(o.Warnings, ScanSSHConfig(pth, info)...)
-	o.Warnings = append(o.Warnings, ScanSSHKeys(pth, info)...)
-	o.Warnings = append(o.Warnings, ScanAuthorizedKeys(pth, info)...)
-	o.Warnings = append(o.Warnings, ScanKnownHosts(pth, info)...)
-
+	o.Warnings = append(o.Warnings, o.ScanSSH(pth, info)...)
+	o.Warnings = append(o.Warnings, o.ScanSSHConfig(pth, info)...)
+	o.Warnings = append(o.Warnings, o.ScanSSHKeys(pth, info)...)
+	o.Warnings = append(o.Warnings, o.ScanSSHAuthorizedKeys(pth, info)...)
+	o.Warnings = append(o.Warnings, o.ScanSSHKnownHosts(pth, info)...)
+	o.Warnings = append(o.Warnings, o.ScanHome(pth, info)...)
 	return nil
 }
 
 // Scan checks the given root file path recursively
 // for known permission discrepancies.
-func Scan(root string) []string {
-	var scanner Scanner
+func Scan(root string) ([]string, error) {
+	scanner, err := NewScanner()
 
-	err := filepath.Walk(root, scanner.Walk)
-
-	if err != nil && err != io.EOF {
-		log.Print(err)
+	if err != nil {
+		return []string{}, err
 	}
 
-	return scanner.Warnings
+	err = filepath.Walk(root, scanner.Walk)
+
+	if err != nil && err != io.EOF {
+		return scanner.Warnings, err
+	}
+
+	return scanner.Warnings, nil
 }
 
 // Report emits any warnings the console.
 // If warnings are present, returns 1.
 // Else, returns 0.
 func Report(root string) int {
-	warnings := Scan(root)
+	warnings, err := Scan(root)
 
 	for _, warning := range warnings {
 		fmt.Println(warning)
 	}
 
 	if len(warnings) != 0 {
+		return 1
+	}
+
+	if err != nil {
+		fmt.Println(err)
 		return 1
 	}
 
