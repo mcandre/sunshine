@@ -1,4 +1,4 @@
-# carrots: file permission investigator
+# carrots: in situ permission scanner
 
 # EXAMPLES
 
