@@ -13,6 +13,14 @@ $ carrots
 
 carrots scans file paths for permission discrepancies. For example, SSH requires files and directories to adhere to a standard chmod permission bit policy. When carrots detects a discrepancy, it emits a warning.
 
+# DOCUMENTATION
+
+https://pkg.go.dev/github.com/mcandre/carrots
+
+# DOWNLOAD
+
+https://github.com/mcandre/carrots/releases
+
 # INSTALL FROM SOURCE
 
 ```console
