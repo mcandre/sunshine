@@ -29,7 +29,7 @@ For more information on developing tug itself, see [DEVELOPMENT.md](DEVELOPMENT.
 
 # LICENSE
 
-FreeBSD
+BSD-2-Clause
 
 # USAGE
 
