@@ -1,4 +1,4 @@
-# carrots: your local access investigator
+# carrots: file permission investigator
 
 # EXAMPLES
 
