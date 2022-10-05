@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"path"
 	"path/filepath"
-	"os"
 	"regexp"
 )
 
@@ -102,7 +102,7 @@ func (o Scanner) ScanSSHKeys(pth string, info os.FileInfo) []string {
 	return []string{}
 }
 
-// ScanAuthorizedKeys analyzes authorized_keys files.
+// ScanSSHAuthorizedKeys analyzes authorized_keys files.
 func (o Scanner) ScanSSHAuthorizedKeys(pth string, info os.FileInfo) []string {
 	if info.Name() == "authorized_keys" {
 		mode := info.Mode() % 01000
@@ -115,7 +115,7 @@ func (o Scanner) ScanSSHAuthorizedKeys(pth string, info os.FileInfo) []string {
 	return []string{}
 }
 
-// ScanKnownHosts analyzes known_hosts files.
+// ScanSSHKnownHosts analyzes known_hosts files.
 func (o Scanner) ScanSSHKnownHosts(pth string, info os.FileInfo) []string {
 	if info.Name() == "known_hosts" {
 		mode := info.Mode() % 01000
