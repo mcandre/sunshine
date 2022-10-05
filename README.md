@@ -27,6 +27,10 @@ None
 
 For more information on developing tug itself, see [DEVELOPMENT.md](DEVELOPMENT.md).
 
+# LICENSE
+
+FreeBSD
+
 # USAGE
 
 By default, `carrots` analyzes the current working directory tree. To analyze other paths, list some files and/or directories explicitly:
