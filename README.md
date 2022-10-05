@@ -6,7 +6,7 @@
 $ cd examples
 
 $ carrots
-/Users/andrew/go/src/github.com/mcandre/carrots/examples/.ssh/id_test: expected chmod 0600, got 0644
+.ssh/id_test: expected chmod 0600, got 0644
 ```
 
 # ABOUT
