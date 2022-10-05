@@ -153,6 +153,7 @@ func (o *Scanner) Walk(pth string, info os.FileInfo, err error) error {
 	o.Warnings = append(o.Warnings, o.ScanSSHKeys(pth, info)...)
 	o.Warnings = append(o.Warnings, o.ScanSSHAuthorizedKeys(pth, info)...)
 	o.Warnings = append(o.Warnings, o.ScanSSHKnownHosts(pth, info)...)
+
 	o.Warnings = append(o.Warnings, o.ScanHome(pth, info)...)
 	return nil
 }
