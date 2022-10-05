@@ -143,17 +143,19 @@ func (o *Scanner) Walk(pth string, info os.FileInfo, err error) error {
 
 // Scan checks the given root file path recursively
 // for known permission discrepancies.
-func Scan(root string) ([]string, error) {
+func Scan(roots []string) ([]string, error) {
 	scanner, err := NewScanner()
 
 	if err != nil {
 		return []string{}, err
 	}
 
-	err = filepath.Walk(root, scanner.Walk)
+	for _, root := range roots {
+		err2 := filepath.Walk(root, scanner.Walk)
 
-	if err != nil && err != io.EOF {
-		return scanner.Warnings, err
+		if err2 != nil && err2 != io.EOF {
+			return scanner.Warnings, err2
+		}
 	}
 
 	return scanner.Warnings, nil
@@ -162,8 +164,8 @@ func Scan(root string) ([]string, error) {
 // Report emits any warnings the console.
 // If warnings are present, returns 1.
 // Else, returns 0.
-func Report(root string) int {
-	warnings, err := Scan(root)
+func Report(roots []string) int {
+	warnings, err := Scan(roots)
 
 	for _, warning := range warnings {
 		fmt.Println(warning)
