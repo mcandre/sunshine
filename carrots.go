@@ -4,6 +4,7 @@ import (
 	"io"
 	"fmt"
 	"log"
+	"path"
 	"path/filepath"
 	"os"
 )
@@ -21,6 +22,23 @@ func ScanSSH(pth string, info os.FileInfo) []string {
 
 		if mode != 0700 {
 			return []string{fmt.Sprintf("%s: expected chmod 0700, got %04o", pth, mode)}
+		}
+	}
+
+	return []string{}
+}
+
+// ScanSSHConfig analyzes .ssh/config files.
+func ScanSSHConfig(pth string, info os.FileInfo) []string {
+	if info.Name() == "config" {
+		parent := path.Base(filepath.Dir(pth))
+
+		if parent == ".ssh" {
+			mode := info.Mode() % 01000
+
+			if mode != 0400 {
+				return []string{fmt.Sprintf("%s: expected chmod 0400, got %04o", pth, mode)}
+			}
 		}
 	}
 
@@ -57,6 +75,7 @@ func ScanKnownHosts(pth string, info os.FileInfo) []string {
 // collecting known permission discrepancies.
 func (o *Scanner) Walk(pth string, info os.FileInfo, err error) error {
 	o.Warnings = append(o.Warnings, ScanSSH(pth, info)...)
+	o.Warnings = append(o.Warnings, ScanSSHConfig(pth, info)...)
 	o.Warnings = append(o.Warnings, ScanAuthorizedKeys(pth, info)...)
 	o.Warnings = append(o.Warnings, ScanKnownHosts(pth, info)...)
 
