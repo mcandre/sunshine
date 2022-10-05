@@ -40,11 +40,25 @@ func ScanAuthorizedKeys(pth string, info os.FileInfo) []string {
 	return []string{}
 }
 
+// ScanKnownHosts analyzes known_hosts files.
+func ScanKnownHosts(pth string, info os.FileInfo) []string {
+	if info.Name() == "known_hosts" {
+		mode := info.Mode() % 01000
+
+		if mode != 0644 {
+			return []string{fmt.Sprintf("%s: expected chmod 0644, got %04o", pth, mode)}
+		}
+	}
+
+	return []string{}
+}
+
 // Walk traverses a file path recursively,
 // collecting known permission discrepancies.
 func (o *Scanner) Walk(pth string, info os.FileInfo, err error) error {
 	o.Warnings = append(o.Warnings, ScanSSH(pth, info)...)
 	o.Warnings = append(o.Warnings, ScanAuthorizedKeys(pth, info)...)
+	o.Warnings = append(o.Warnings, ScanKnownHosts(pth, info)...)
 
 	return nil
 }
