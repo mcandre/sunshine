@@ -5,6 +5,7 @@ import (
 
 	"flag"
 	"fmt"
+	"log"
 	"os"
 )
 
@@ -36,5 +37,30 @@ func main() {
 		roots = []string{cwd}
 	}
 
-	os.Exit(sunshine.Report(roots))
+	scanner, err := sunshine.Scan(roots)
+
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	var clean bool
+	var warning string
+
+	for {
+		select {
+		case err = <-scanner.ErrCh:
+			clean = false
+			log.Println(err)
+		case warning = <-scanner.WarnCh:
+			clean = false
+			log.Println(warning)
+		case <-scanner.DoneCh:
+			if !clean {
+				os.Exit(1)
+			}
+
+			os.Exit(0)
+		}
+	}
 }
