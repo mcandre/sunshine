@@ -19,6 +19,12 @@ var SSHPublicKeyPattern = regexp.MustCompile("^id_.+\\.pub$")
 
 // Scanner collects warnings.
 type Scanner struct {
+	// Debug enables additional messages.
+	Debug bool
+
+	// DebugCh signals low level events.
+	DebugCh chan string
+
 	// WarnCh signals permission discrepancies.
 	WarnCh chan string
 
@@ -33,17 +39,20 @@ type Scanner struct {
 }
 
 // NewScanner constructs a scanner.
-func NewScanner() (*Scanner, error) {
+func NewScanner(debug bool) (*Scanner, error) {
 	home, err := os.UserHomeDir()
 
 	if err != nil {
 		return nil, err
 	}
 
+	debugCh := make(chan string)
 	warnCh := make(chan string)
 	errCh := make(chan error)
 	doneCh := make(chan struct{})
 	scanner := Scanner{
+		Debug: debug,
+		DebugCh: debugCh,
 		WarnCh: warnCh,
 		ErrCh: errCh,
 		DoneCh: doneCh,
@@ -52,8 +61,8 @@ func NewScanner() (*Scanner, error) {
 	return &scanner, nil
 }
 
-// ScanFileExists checks paths for existence.
-func (o Scanner) ScanFileExists(pth string, info os.FileInfo) error {
+// ChecknFileExists checks paths for existence.
+func (o Scanner) CheckFileExists(pth string, info os.FileInfo) error {
 	_, err := os.Stat(pth)
 
 	if errors.Is(err, os.ErrNotExist) {
@@ -172,7 +181,11 @@ func (o Scanner) ScanHome(pth string, info os.FileInfo) {
 // Walk traverses a file path recursively,
 // collecting known permission discrepancies.
 func (o *Scanner) Walk(pth string, info os.FileInfo, err error) error {
-	if err2 := o.ScanFileExists(pth, info); err2 != nil {
+	if o.Debug {
+		o.DebugCh <- fmt.Sprintf("scanning: %s", pth)
+	}
+
+	if err2 := o.CheckFileExists(pth, info); err2 != nil {
 		return err2
 	}
 
@@ -185,10 +198,10 @@ func (o *Scanner) Walk(pth string, info os.FileInfo, err error) error {
 	return nil
 }
 
-// Scan checks the given root file path recursively
+// Illuminate pours through the given file paths recursively
 // for known permission discrepancies.
-func Scan(roots []string) (*Scanner, error) {
-	scanner, err := NewScanner()
+func Illuminate(roots []string, debug bool) (*Scanner, error) {
+	scanner, err := NewScanner(debug)
 
 	if err != nil {
 		return nil, err

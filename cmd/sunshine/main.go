@@ -9,6 +9,7 @@ import (
 	"os"
 )
 
+var flagDebug = flag.Bool("debug", false, "Enable additional logging")
 var flagVersion = flag.Bool("version", false, "Show version information")
 var flagHelp = flag.Bool("help", false, "Show usage information")
 
@@ -24,6 +25,7 @@ func main() {
 		os.Exit(0)
 	}
 
+	debug := *flagDebug
 	roots := flag.Args()
 
 	if len(roots) == 0 {
@@ -37,7 +39,7 @@ func main() {
 		roots = []string{cwd}
 	}
 
-	scanner, err := sunshine.Scan(roots)
+	scanner, err := sunshine.Illuminate(roots, debug)
 
 	if err != nil {
 		fmt.Println(err)
@@ -45,16 +47,18 @@ func main() {
 	}
 
 	var clean bool
-	var warning string
+	var msg string
 
 	for {
 		select {
+		case msg = <-scanner.DebugCh:
+			log.Println(msg)
+		case msg = <-scanner.WarnCh:
+			clean = false
+			log.Printf("warning: %s", msg)
 		case err = <-scanner.ErrCh:
 			clean = false
 			log.Println(err)
-		case warning = <-scanner.WarnCh:
-			clean = false
-			log.Println(warning)
 		case <-scanner.DoneCh:
 			if !clean {
 				os.Exit(1)
