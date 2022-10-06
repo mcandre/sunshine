@@ -75,6 +75,7 @@ $ sunshine ~/.ssh
 * [brew](https://brew.sh/) package manager provides a self permission check with the `brew doctor` command
 * [chmod](https://linux.die.net/man/1/chmod) alters file permissions
 * [file](https://linux.die.net/man/1/file) analyzes file types
+* [find](https://linux.die.net/man/1/find) can identify files and directories with specific permission matches
 * [linters](https://github.com/mcandre/linters) provides an exhaustive collection of linters
 * [ls](https://linux.die.net/man/1/ls) can list file permissions
 * [stank](https://github.com/mcandre/stank) analyzes executable and library shell scripts
