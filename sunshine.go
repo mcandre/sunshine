@@ -72,35 +72,42 @@ func (o Scanner) CheckFileExists(pth string, info os.FileInfo) error {
 	return nil
 }
 
+// ValidateDirectory enforces the given directory policy.
+func (o *Scanner) ValidateDirectory(pth string, info os.FileInfo) {
+	if !info.IsDir() {
+		o.WarnCh <- fmt.Sprintf("%s: expected directory, got file", pth)
+	}
+}
+
+// ValidateFile enforces the given file policy.
+func (o *Scanner) ValidateFile(pth string, info os.FileInfo) {
+	if info.IsDir() {
+		o.WarnCh <- fmt.Sprintf("%s: expected file, got directory", pth)
+	}
+}
+
+// ValidateChmod enforces the given chmod policy.
+func (o *Scanner) ValidateChmod(pth string, info os.FileInfo, expectedMode os.FileMode) {
+	observedMode := info.Mode() % 01000
+
+	if expectedMode != observedMode {
+		o.WarnCh <- fmt.Sprintf("%s: expected chmod %04o, got %04o", pth, expectedMode, observedMode)
+	}
+}
+
 // ScanEtcSSH analyzes /etc or /etc/ssh.
 func (o Scanner) ScanEtcSSH(pth string, info os.FileInfo) {
 	if pth == "/etc" || pth == "/etc/ssh" {
-		if !info.IsDir() {
-			o.WarnCh <- fmt.Sprintf("%s: expected directory, got file", pth)
-		}
-
-		expectedMode := 0755
-		observedMode := int(info.Mode() % 01000)
-
-		if observedMode != expectedMode {
-			o.WarnCh <- fmt.Sprintf("%s: expected chmod %04o, got %04o", pth, expectedMode, observedMode)
-		}
+		o.ValidateDirectory(pth, info)
+		o.ValidateChmod(pth, info, 0755)
 	}
 }
 
 // ScanSSH analyzes .ssh directories.
 func (o Scanner) ScanUserSSH(pth string, info os.FileInfo) {
 	if info.Name() == ".ssh" {
-		if !info.IsDir() {
-			o.WarnCh <- fmt.Sprintf("%s: expected directory, got file", pth)
-		}
-
-		expectedMode := 0700
-		observedMode := int(info.Mode() % 01000)
-
-		if observedMode != expectedMode {
-			o.WarnCh <- fmt.Sprintf("%s: expected chmod %04o, got %04o", pth, expectedMode, observedMode)
-		}
+		o.ValidateDirectory(pth, info)
+		o.ValidateChmod(pth, info, 0700)
 	}
 }
 
@@ -110,16 +117,8 @@ func (o Scanner) ScanSSHConfig(pth string, info os.FileInfo) {
 		parent := path.Base(filepath.Dir(pth))
 
 		if parent == ".ssh" {
-			if info.IsDir() {
-				o.WarnCh <- fmt.Sprintf("%s: expected file, got directory", pth)
-			}
-
-			expectedMode := 0400
-			observedMode := int(info.Mode() % 01000)
-
-			if observedMode != expectedMode {
-				o.WarnCh <- fmt.Sprintf("%s: expected chmod %04o, got %04o", pth, expectedMode, observedMode)
-			}
+			o.ValidateFile(pth, info)
+			o.ValidateChmod(pth, info, 0400)
 		}
 	}
 }
@@ -132,24 +131,12 @@ func (o Scanner) ScanSSHKeys(pth string, info os.FileInfo) {
 		parent := path.Base(filepath.Dir(pth))
 
 		if parent == ".ssh" {
-			if info.IsDir() {
-				o.WarnCh <- fmt.Sprintf("%s: expected file, got directory", pth)
-			}
-
-			observedMode := int(info.Mode() % 01000)
+			o.ValidateFile(pth, info)
 
 			if SSHPublicKeyPattern.MatchString(name) {
-				expectedMode := 0644
-
-				if observedMode != 0644 {
-					o.WarnCh <- fmt.Sprintf("%s: expected chmod %04o, got %04o", pth, expectedMode, observedMode)
-				}
+				o.ValidateChmod(pth, info, 0644)
 			} else {
-				expectedMode := 0600
-
-				if observedMode != expectedMode {
-					o.WarnCh <- fmt.Sprintf("%s: expected chmod %04o, got %04o", pth, expectedMode, observedMode)
-				}
+				o.ValidateChmod(pth, info, 0600)
 			}
 		}
 	}
@@ -158,48 +145,24 @@ func (o Scanner) ScanSSHKeys(pth string, info os.FileInfo) {
 // ScanSSHAuthorizedKeys analyzes authorized_keys files.
 func (o Scanner) ScanSSHAuthorizedKeys(pth string, info os.FileInfo) {
 	if info.Name() == "authorized_keys" {
-		if info.IsDir() {
-			o.WarnCh <- fmt.Sprintf("%s: expected file, got directory", pth)
-		}
-
-		expectedMode := 0600
-		observedMode := int(info.Mode() % 01000)
-
-		if observedMode != expectedMode {
-			o.WarnCh <- fmt.Sprintf("%s: expected chmod %04o, got %04o", pth, expectedMode, observedMode)
-		}
+		o.ValidateFile(pth, info)
+		o.ValidateChmod(pth, info, 0600)
 	}
 }
 
 // ScanSSHKnownHosts analyzes known_hosts files.
 func (o Scanner) ScanSSHKnownHosts(pth string, info os.FileInfo) {
 	if info.Name() == "known_hosts" {
-		if info.IsDir() {
-			o.WarnCh <- fmt.Sprintf("%s: expected file, got directory", pth)
-		}
-
-		expectedMode := 0644
-		observedMode := int(info.Mode() % 01000)
-
-		if observedMode != expectedMode {
-			o.WarnCh <- fmt.Sprintf("%s: expected chmod %04o, got %04o", pth, expectedMode, observedMode)
-		}
+		o.ValidateFile(pth, info)
+		o.ValidateChmod(pth, info, 0644)
 	}
 }
 
 // ScanHome analyzes home directories.
 func (o Scanner) ScanHome(pth string, info os.FileInfo) {
 	if info.Name() == o.Home {
-		if !info.IsDir() {
-			o.WarnCh <- fmt.Sprintf("%s: expected directory, got file", pth)
-		}
-
-		expectedMode := 0755
-		observedMode := int(info.Mode() % 01000)
-
-		if observedMode != expectedMode {
-			o.WarnCh <- fmt.Sprintf("%s: expected chmod %04o, got %04o", pth, expectedMode, observedMode)
-		}
+		o.ValidateDirectory(pth, info)
+		o.ValidateChmod(pth, info, 0755)
 	}
 }
 
