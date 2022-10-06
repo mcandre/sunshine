@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/mcandre/carrots"
+	"github.com/mcandre/sunshine"
 
 	"fmt"
 	"os"
@@ -23,5 +23,5 @@ func main() {
 		roots = os.Args[1:]
 	}
 
-	os.Exit(carrots.Report(roots))
+	os.Exit(sunshine.Report(roots))
 }

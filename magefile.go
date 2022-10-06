@@ -9,7 +9,7 @@ import (
 	"os/exec"
 
 	"github.com/magefile/mage/mg"
-	"github.com/mcandre/carrots"
+	"github.com/mcandre/sunshine"
 	"github.com/mcandre/mage-extras"
 )
 
@@ -26,7 +26,7 @@ func Audit() error { return mageextras.SnykTest() }
 func Test() error {
 	mg.Deps(Install)
 
-	cmd := exec.Command("carrots", "README.md")
+	cmd := exec.Command("sunshine", "README.md")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
@@ -62,10 +62,10 @@ func Lint() error {
 }
 
 // portBasename labels the artifact basename.
-var portBasename = fmt.Sprintf("carrots-%s", carrots.Version)
+var portBasename = fmt.Sprintf("sunshine-%s", sunshine.Version)
 
 // repoNamespace identifies the Go namespace for this project.
-var repoNamespace = "github.com/mcandre/carrots"
+var repoNamespace = "github.com/mcandre/sunshine"
 
 // Factorio cross-compiles Go binaries for a multitude of platforms.
 func Factorio() error { return mageextras.Factorio(portBasename) }
@@ -77,7 +77,7 @@ func Port() error { mg.Deps(Factorio); return mageextras.Archive(portBasename, a
 func Install() error { return mageextras.Install() }
 
 // Uninstall deletes installed Go applications.
-func Uninstall() error { return mageextras.Uninstall("carrots") }
+func Uninstall() error { return mageextras.Uninstall("sunshine") }
 
 // Clean deletes artifacts.
 func Clean() error { return os.RemoveAll(artifactsPath) }

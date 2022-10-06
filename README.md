@@ -1,30 +1,40 @@
-# carrots: in situ permission scanner
+# sunshine: file permission security analyzer
 
-# EXAMPLES
+![a regal sun rising upon the beach](sunshine.jpg)
+
+# ABOUT
+
+> sunshine is the best disinfectant
+
+`sunshine` reveals paths with anomalous file permissions.
+
+File permissions play a critical role in software applications, from security to basic functionality. For example, SSH may reject authentication attempts when the keys have incorrect permissions.
+
+Unfortunately, many software systems have neither the correct file permissions applied, nor useful error handling code to help users quickly diagnose the issue. That's where sunshine comes up.
+
+sunshine is an automated program for recursively scanning files and directories for unidiomatic permission settings.
+
+# EXAMPLE
 
 ```console
 $ cd examples
 
-$ carrots
+$ sunshine
 .ssh/id_test: expected chmod 0600, got 0644
 ```
 
-# ABOUT
-
-carrots scans file paths for permission discrepancies. For example, SSH requires files and directories to adhere to a standard chmod permission bit policy. When carrots detects a discrepancy, it emits a warning.
-
 # DOCUMENTATION
 
-https://pkg.go.dev/github.com/mcandre/carrots
+https://pkg.go.dev/github.com/mcandre/sunshine
 
 # DOWNLOAD
 
-https://github.com/mcandre/carrots/releases
+https://github.com/mcandre/sunshine/releases
 
 # INSTALL FROM SOURCE
 
 ```console
-$ go install github.com/mcandre/carrots/cmd/carrots@latest
+$ go install github.com/mcandre/sunshine/cmd/sunshine@latest
 ```
 
 # RUNTIME REQUIREMENTS
@@ -41,12 +51,19 @@ BSD-2-Clause
 
 # USAGE
 
-carrots follows classical UNIX CLI conventions: Basic exit codes, and no output except in case of an issue.
+sunshine follows classical UNIX CLI conventions: Basic exit codes, and no output except in case of an issue.
 
-By default, `carrots` analyzes the current working directory tree. To analyze other paths, list some files and/or directories explicitly. For example, to scan your live SSH directory tree:
+To analyze specific paths, list some files and/or directories explicitly. For example, to scan your live SSH directory tree:
 
 ```console
-$ carrots ~/.ssh
+$ sunshine ~/.ssh
 ```
 
-🥕
+By default, `sunshine` analyzes the current working directory tree.
+
+# SEE ALSO
+
+* [chmod](https://linux.die.net/man/1/chmod) alters file permissions
+* [file](https://linux.die.net/man/1/file) analyzes file types
+* [ls](https://linux.die.net/man/1/ls) can list file permissions
+* [stank](https://github.com/mcandre/stank) analyzes executable and library shell scripts

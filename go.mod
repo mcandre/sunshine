@@ -1,4 +1,4 @@
-module github.com/mcandre/carrots
+module github.com/mcandre/sunshine
 
 go 1.19
 
