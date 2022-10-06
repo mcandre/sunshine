@@ -79,10 +79,11 @@ func (o Scanner) ScanEtcSSH(pth string, info os.FileInfo) {
 			o.WarnCh <- fmt.Sprintf("%s: expected directory, got file", pth)
 		}
 
-		mode := info.Mode() % 01000
+		expectedMode := 0755
+		observedMode := int(info.Mode() % 01000)
 
-		if mode != 0755 {
-			o.WarnCh <- fmt.Sprintf("%s: expected chmod 0755, got %04o", pth, mode)
+		if observedMode != expectedMode {
+			o.WarnCh <- fmt.Sprintf("%s: expected chmod %04o, got %04o", pth, expectedMode, observedMode)
 		}
 	}
 }
@@ -94,10 +95,11 @@ func (o Scanner) ScanUserSSH(pth string, info os.FileInfo) {
 			o.WarnCh <- fmt.Sprintf("%s: expected directory, got file", pth)
 		}
 
-		mode := info.Mode() % 01000
+		expectedMode := 0700
+		observedMode := int(info.Mode() % 01000)
 
-		if mode != 0700 {
-			o.WarnCh <- fmt.Sprintf("%s: expected chmod 0700, got %04o", pth, mode)
+		if observedMode != expectedMode {
+			o.WarnCh <- fmt.Sprintf("%s: expected chmod %04o, got %04o", pth, expectedMode, observedMode)
 		}
 	}
 }
@@ -112,10 +114,11 @@ func (o Scanner) ScanSSHConfig(pth string, info os.FileInfo) {
 				o.WarnCh <- fmt.Sprintf("%s: expected file, got directory", pth)
 			}
 
-			mode := info.Mode() % 01000
+			expectedMode := 0400
+			observedMode := int(info.Mode() % 01000)
 
-			if mode != 0400 {
-				o.WarnCh <- fmt.Sprintf("%s: expected chmod 0400, got %04o", pth, mode)
+			if observedMode != expectedMode {
+				o.WarnCh <- fmt.Sprintf("%s: expected chmod %04o, got %04o", pth, expectedMode, observedMode)
 			}
 		}
 	}
@@ -133,15 +136,19 @@ func (o Scanner) ScanSSHKeys(pth string, info os.FileInfo) {
 				o.WarnCh <- fmt.Sprintf("%s: expected file, got directory", pth)
 			}
 
-			mode := info.Mode() % 01000
+			observedMode := int(info.Mode() % 01000)
 
 			if SSHPublicKeyPattern.MatchString(name) {
-				if mode != 0644 {
-					o.WarnCh <- fmt.Sprintf("%s: expected chmod 0644, got %04o", pth, mode)
+				expectedMode := 0644
+
+				if observedMode != 0644 {
+					o.WarnCh <- fmt.Sprintf("%s: expected chmod %04o, got %04o", pth, expectedMode, observedMode)
 				}
 			} else {
-				if mode != 0600 {
-					o.WarnCh <- fmt.Sprintf("%s: expected chmod 0600, got %04o", pth, mode)
+				expectedMode := 0600
+
+				if observedMode != expectedMode {
+					o.WarnCh <- fmt.Sprintf("%s: expected chmod %04o, got %04o", pth, expectedMode, observedMode)
 				}
 			}
 		}
@@ -155,10 +162,11 @@ func (o Scanner) ScanSSHAuthorizedKeys(pth string, info os.FileInfo) {
 			o.WarnCh <- fmt.Sprintf("%s: expected file, got directory", pth)
 		}
 
-		mode := info.Mode() % 01000
+		expectedMode := 0600
+		observedMode := int(info.Mode() % 01000)
 
-		if mode != 0600 {
-			o.WarnCh <- fmt.Sprintf("%s: expected chmod 0600, got %04o", pth, mode)
+		if observedMode != expectedMode {
+			o.WarnCh <- fmt.Sprintf("%s: expected chmod %04o, got %04o", pth, expectedMode, observedMode)
 		}
 	}
 }
@@ -170,10 +178,11 @@ func (o Scanner) ScanSSHKnownHosts(pth string, info os.FileInfo) {
 			o.WarnCh <- fmt.Sprintf("%s: expected file, got directory", pth)
 		}
 
-		mode := info.Mode() % 01000
+		expectedMode := 0644
+		observedMode := int(info.Mode() % 01000)
 
-		if mode != 0644 {
-			o.WarnCh <- fmt.Sprintf("%s: expected chmod 0644, got %04o", pth, mode)
+		if observedMode != expectedMode {
+			o.WarnCh <- fmt.Sprintf("%s: expected chmod %04o, got %04o", pth, expectedMode, observedMode)
 		}
 	}
 }
@@ -185,10 +194,11 @@ func (o Scanner) ScanHome(pth string, info os.FileInfo) {
 			o.WarnCh <- fmt.Sprintf("%s: expected directory, got file", pth)
 		}
 
-		mode := info.Mode() % 01000
+		expectedMode := 0755
+		observedMode := int(info.Mode() % 01000)
 
-		if mode != 0755 {
-			o.WarnCh <- fmt.Sprintf("%s: expected chmod 0755, got %04o", pth, mode)
+		if observedMode != expectedMode {
+			o.WarnCh <- fmt.Sprintf("%s: expected chmod %04o, got %04o", pth, expectedMode, observedMode)
 		}
 	}
 }
