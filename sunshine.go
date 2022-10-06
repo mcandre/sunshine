@@ -49,96 +49,132 @@ func (o Scanner) ScanFileExists(pth string, info os.FileInfo) error {
 
 // ScanSSH analyzes .ssh directories.
 func (o Scanner) ScanSSH(pth string, info os.FileInfo) []string {
+	var warnings []string
+
 	if info.Name() == ".ssh" {
+		if !info.IsDir() {
+			warnings = append(warnings, fmt.Sprintf("%s: expected directory, got file", pth))
+		}
+
 		mode := info.Mode() % 01000
 
 		if mode != 0700 {
-			return []string{fmt.Sprintf("%s: expected chmod 0700, got %04o", pth, mode)}
+			warnings = append(warnings, fmt.Sprintf("%s: expected chmod 0700, got %04o", pth, mode))
 		}
 	}
 
-	return []string{}
+	return warnings
 }
 
 // ScanSSHConfig analyzes .ssh/config files.
 func (o Scanner) ScanSSHConfig(pth string, info os.FileInfo) []string {
+	var warnings []string
+
 	if info.Name() == "config" {
 		parent := path.Base(filepath.Dir(pth))
 
 		if parent == ".ssh" {
+			if info.IsDir() {
+				warnings = append(warnings, fmt.Sprintf("%s: expected file, got directory", pth))
+			}
+
 			mode := info.Mode() % 01000
 
 			if mode != 0400 {
-				return []string{fmt.Sprintf("%s: expected chmod 0400, got %04o", pth, mode)}
+				warnings = append(warnings, fmt.Sprintf("%s: expected chmod 0400, got %04o", pth, mode))
 			}
 		}
 	}
 
-	return []string{}
+	return warnings
 }
 
 // ScanSSHKeys analyzes .ssh/id_.+(\.pub)? files.
 func (o Scanner) ScanSSHKeys(pth string, info os.FileInfo) []string {
+	var warnings []string
+
 	name := info.Name()
 
 	if SSHKeyPattern.MatchString(name) {
 		parent := path.Base(filepath.Dir(pth))
 
 		if parent == ".ssh" {
+			if info.IsDir() {
+				warnings = append(warnings, fmt.Sprintf("%s: expected file, got directory", pth))
+			}
+
 			mode := info.Mode() % 01000
 
 			if SSHPublicKeyPattern.MatchString(name) {
 				if mode != 0644 {
-					return []string{fmt.Sprintf("%s: expected chmod 0644, got %04o", pth, mode)}
+					warnings = append(warnings, fmt.Sprintf("%s: expected chmod 0644, got %04o", pth, mode))
 				}
 			} else {
 				if mode != 0600 {
-					return []string{fmt.Sprintf("%s: expected chmod 0600, got %04o", pth, mode)}
+					warnings = append(warnings, fmt.Sprintf("%s: expected chmod 0600, got %04o", pth, mode))
 				}
 			}
 		}
 	}
 
-	return []string{}
+	return warnings
 }
 
 // ScanSSHAuthorizedKeys analyzes authorized_keys files.
 func (o Scanner) ScanSSHAuthorizedKeys(pth string, info os.FileInfo) []string {
+	var warnings []string
+
 	if info.Name() == "authorized_keys" {
+		if info.IsDir() {
+			warnings = append(warnings, fmt.Sprintf("%s: expected file, got directory", pth))
+		}
+
 		mode := info.Mode() % 01000
 
 		if mode != 0600 {
-			return []string{fmt.Sprintf("%s: expected chmod 0600, got %04o", pth, mode)}
+			warnings = append(warnings, fmt.Sprintf("%s: expected chmod 0600, got %04o", pth, mode))
 		}
 	}
 
-	return []string{}
+	return warnings
 }
 
 // ScanSSHKnownHosts analyzes known_hosts files.
 func (o Scanner) ScanSSHKnownHosts(pth string, info os.FileInfo) []string {
+	var warnings []string
+
 	if info.Name() == "known_hosts" {
+		if info.IsDir() {
+			warnings = append(warnings, fmt.Sprintf("%s: expected file, got directory", pth))
+		}
+
 		mode := info.Mode() % 01000
 
 		if mode != 0644 {
-			return []string{fmt.Sprintf("%s: expected chmod 0644, got %04o", pth, mode)}
+			warnings = append(warnings, fmt.Sprintf("%s: expected chmod 0644, got %04o", pth, mode))
 		}
 	}
 
-	return []string{}
+	return warnings
 }
 
 // ScanHome analyzes home directories.
 func (o Scanner) ScanHome(pth string, info os.FileInfo) []string {
+	var warnings []string
+
 	if info.Name() == o.Home {
+		if !info.IsDir() {
+			warnings = append(warnings, fmt.Sprintf("%s: expected directory, got file", pth))
+		}
+
 		mode := info.Mode() % 01000
 
 		if mode != 0755 {
-			return []string{fmt.Sprintf("%s: expected chmod 0755, got %04o", pth, mode)}
+			warnings = append(warnings, fmt.Sprintf("%s: expected chmod 0755, got %04o", pth, mode))
 		}
 	}
 
-	return []string{}
+	return warnings
 }
 
 // Walk traverses a file path recursively,
