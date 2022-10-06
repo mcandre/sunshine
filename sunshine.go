@@ -72,8 +72,23 @@ func (o Scanner) CheckFileExists(pth string, info os.FileInfo) error {
 	return nil
 }
 
+// ScanEtc analyzes /etc.
+func (o Scanner) ScanEtc(pth string, info os.FileInfo) {
+	if pth == "/etc" {
+		if !info.IsDir() {
+			o.WarnCh <- fmt.Sprintf("%s: expected directory, got file", pth)
+		}
+
+		mode := info.Mode() % 01000
+
+		if mode != 0755 {
+			o.WarnCh <- fmt.Sprintf("%s: expected chmod 0755, got %04o", pth, mode)
+		}
+	}
+}
+
 // ScanSSH analyzes .ssh directories.
-func (o Scanner) ScanSSH(pth string, info os.FileInfo) {
+func (o Scanner) ScanUserSSH(pth string, info os.FileInfo) {
 	if info.Name() == ".ssh" {
 		if !info.IsDir() {
 			o.WarnCh <- fmt.Sprintf("%s: expected directory, got file", pth)
@@ -189,7 +204,18 @@ func (o *Scanner) Walk(pth string, info os.FileInfo, err error) error {
 		return err2
 	}
 
-	o.ScanSSH(pth, info)
+	if info.Mode() & os.ModeSymlink != 0 {
+		p, err3 := os.Readlink(pth)
+
+		if err3 != nil {
+			return err3
+		}
+
+		pth = p
+	}
+
+	o.ScanEtc(pth, info)
+	o.ScanUserSSH(pth, info)
 	o.ScanSSHConfig(pth, info)
 	o.ScanSSHKeys(pth, info)
 	o.ScanSSHAuthorizedKeys(pth, info)

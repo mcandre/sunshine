@@ -77,5 +77,5 @@ $ sunshine ~/.ssh
 * [file](https://linux.die.net/man/1/file) analyzes file types
 * [find](https://linux.die.net/man/1/find) can identify files and directories with specific permission matches
 * [linters](https://github.com/mcandre/linters) provides an exhaustive collection of linters
-* [ls](https://linux.die.net/man/1/ls) can list file permissions
+* [ls](https://linux.die.net/man/1/ls) can describe many file and directory metadata entries
 * [stank](https://github.com/mcandre/stank) analyzes executable and library shell scripts
