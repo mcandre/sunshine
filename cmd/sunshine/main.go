@@ -46,8 +46,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	var clean bool
 	var msg string
+	clean := true
 
 	for {
 		select {

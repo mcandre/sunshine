@@ -72,9 +72,9 @@ func (o Scanner) CheckFileExists(pth string, info os.FileInfo) error {
 	return nil
 }
 
-// ScanEtc analyzes /etc.
-func (o Scanner) ScanEtc(pth string, info os.FileInfo) {
-	if pth == "/etc" {
+// ScanEtcSSH analyzes /etc or /etc/ssh.
+func (o Scanner) ScanEtcSSH(pth string, info os.FileInfo) {
+	if pth == "/etc" || pth == "/etc/ssh" {
 		if !info.IsDir() {
 			o.WarnCh <- fmt.Sprintf("%s: expected directory, got file", pth)
 		}
@@ -214,7 +214,7 @@ func (o *Scanner) Walk(pth string, info os.FileInfo, err error) error {
 		pth = p
 	}
 
-	o.ScanEtc(pth, info)
+	o.ScanEtcSSH(pth, info)
 	o.ScanUserSSH(pth, info)
 	o.ScanSSHConfig(pth, info)
 	o.ScanSSHKeys(pth, info)
