@@ -61,6 +61,7 @@ $ sunshine ~/.ssh
 
 # SEE ALSO
 
+* [brew](https://brew.sh/) package manager provides a self permission check with the `brew doctor` command
 * [chmod](https://linux.die.net/man/1/chmod) alters file permissions
 * [file](https://linux.die.net/man/1/file) analyzes file types
 * [ls](https://linux.die.net/man/1/ls) can list file permissions
