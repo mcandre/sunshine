@@ -3,14 +3,29 @@ package main
 import (
 	"github.com/mcandre/sunshine"
 
+	"flag"
 	"fmt"
 	"os"
 )
 
-func main() {
-	var roots []string
+var flagVersion = flag.Bool("version", false, "Show version information")
+var flagHelp = flag.Bool("help", false, "Show usage information")
 
-	if len(os.Args) < 2 {
+func main() {
+	flag.Parse()
+
+	switch {
+	case *flagVersion:
+		fmt.Println(sunshine.Version)
+		os.Exit(0)
+	case *flagHelp:
+		flag.PrintDefaults()
+		os.Exit(0)
+	}
+
+	roots := flag.Args()
+
+	if len(roots) == 0 {
 		cwd, err := os.Getwd()
 
 		if err != nil {
@@ -18,9 +33,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		roots = append(roots, cwd)
-	} else {
-		roots = os.Args[1:]
+		roots = []string{cwd}
 	}
 
 	os.Exit(sunshine.Report(roots))

@@ -23,6 +23,8 @@ $ sunshine
 .ssh/id_test: expected chmod 0600, got 0644
 ```
 
+See `-help` for more detail.
+
 # DOCUMENTATION
 
 https://pkg.go.dev/github.com/mcandre/sunshine
@@ -53,7 +55,16 @@ BSD-2-Clause
 
 sunshine follows classical UNIX CLI conventions: Basic exit codes, and no output except in case of an issue.
 
-By default, sunshine analyzes the current working directory tree. To analyze specific paths, list some files and/or directories explicitly. For example, to scan your live SSH directory tree:
+By default, sunshine analyzes the current working directory tree. To analyze specific paths, list some files and/or directories explicitly.
+
+To scan the example SSH keys:
+
+```console
+$ sunshine .ssh/id_test .ssh/id_test.pub
+.ssh/id_test: expected chmod 0600, got 0644
+```
+
+To scan your live SSH directory tree:
 
 ```console
 $ sunshine ~/.ssh
