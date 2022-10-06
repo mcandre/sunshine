@@ -26,7 +26,7 @@ func Audit() error { return mageextras.SnykTest() }
 func Test() error {
 	mg.Deps(Install)
 
-	cmd := exec.Command("sunshine", "README.md")
+	cmd := exec.Command("sunshine", "-version")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
