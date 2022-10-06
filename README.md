@@ -20,7 +20,7 @@ sunshine is an automated program for recursively scanning files and directories 
 $ cd examples
 
 $ sunshine
-2022/10/06 12:54:43 warning: /Users/andrew/go/src/github.com/mcandre/sunshine/examples/.ssh/id_test: expected chmod 0600, got 0644
+.ssh/id_test: expected chmod 0600, got 0644
 ```
 
 See `-help` for more detail.
@@ -61,7 +61,7 @@ To scan the example SSH keys:
 
 ```console
 $ sunshine .ssh/id_test .ssh/id_test.pub
-2022/10/06 12:55:01 warning: .ssh/id_test: expected chmod 0600, got 0644
+.ssh/id_test: expected chmod 0600, got 0644
 ```
 
 To scan your live SSH directory tree:
