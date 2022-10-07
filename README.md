@@ -70,6 +70,12 @@ To scan your live SSH directory tree:
 $ sunshine ~/.ssh
 ```
 
+Some very poorly configured paths may not be visible to the user account running sunshine. To check for paths missing chmod u+x (directories) or chmod u+r (files), run sunshine with root privileges:
+
+```console
+$ sudo sunshine
+```
+
 # BEST PRACTICES
 
 sunshine is most effective for analyzing local file systems, dynamic applications, traditional network file storage directory trees such as rsync / FTP, and server / VM environments. Maxmimum security is achieved by deploying only the bare minimum files necessary for service, using chmod 0500 for directories and chmod 0400 for files, on read-only file system mounts. When access is needed by multiple users, apply the a UNIX group policy. Keep credentials and other sensitive data out of base application directory trees.
