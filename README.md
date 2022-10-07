@@ -78,6 +78,8 @@ For safety and security, we recommend static assets rather than dynamic applicat
 
 Dynamic applications can be compiled as static executables (chmod 0500) and installed into `FROM scratch` Docker containers, with immutable file systems. sunshine may prove useful for underlying hypervisor and Kubernetes node environments, where traditional server security must still be maintained.
 
+Classical SSH access can be disabled entirely in favor of cloud console access (VM's), or in favor of `kubectl exec` access (Kubernetes pods).
+
 # SEE ALSO
 
 * [brew](https://brew.sh/) package manager provides a self permission check with the `brew doctor` command
