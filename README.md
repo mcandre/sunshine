@@ -70,6 +70,14 @@ To scan your live SSH directory tree:
 $ sunshine ~/.ssh
 ```
 
+# BEST PRACTICES
+
+sunshine is most effective for analyzing local development file systems, dynamic applications, and traditional server environments. Maxmimum security is achieved by deploying only the bare minimum files necessary for service, using chmod 0500 for directories and chmod 0400 for files, on read-only file system mounts. Keep credentials and other sensitive data out of base application directory trees.
+
+For safety and security, we recommend static assets rather than dynamic applications, such as deploying Web packs to a CDN. CDN bucket-wide permissions are ideally managed via reusable, scalable role policies, which are easier to apply and validate than individual file/object permissions. And don't make a CDN bucket world-readable without cause.
+
+Dynamic applications can be compiled as static executables (chmod 0500) and installed into `FROM scratch` Docker containers, with immutable file systems. sunshine may prove useful for underlying hypervisor and Kubernetes node environments, where traditional server security must still be maintained.
+
 # SEE ALSO
 
 * [brew](https://brew.sh/) package manager provides a self permission check with the `brew doctor` command
