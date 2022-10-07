@@ -95,6 +95,24 @@ func (o *Scanner) ValidateChmod(pth string, info os.FileInfo, expectedMode os.Fi
 	}
 }
 
+// ValidateChmodMask enforces the given chmod mask policy.
+func (o *Scanner) ValidateChmodMask(pth string, info os.FileInfo, expectedMask os.FileMode) {
+	observedMode := info.Mode() % 01000
+
+	if expectedMask & observedMode == 0 {
+		o.WarnCh <- fmt.Sprintf("%s: expected chmod mask to union with %04o, got %04o", pth, expectedMask, observedMode)
+	}
+}
+
+// ScanInsible analyzes paths for missing u+x (directories) or u+r (files) bits.
+func (o Scanner) ScanInvisible(pth string, info os.FileInfo) {
+	if info.IsDir() {
+		o.ValidateChmodMask(pth, info, 0500)
+	} else {
+		o.ValidateChmodMask(pth, info, 0400)
+	}
+}
+
 // ScanEtcSSH analyzes /etc or /etc/ssh.
 func (o Scanner) ScanEtcSSH(pth string, info os.FileInfo) {
 	if pth == "/etc" || pth == "/etc/ssh" {
@@ -173,6 +191,10 @@ func (o *Scanner) Walk(pth string, info os.FileInfo, err error) error {
 		o.DebugCh <- fmt.Sprintf("scanning: %s", pth)
 	}
 
+	if info == nil {
+		return fmt.Errorf("%s: access denied", pth)
+	}
+
 	if err2 := o.CheckFileExists(pth, info); err2 != nil {
 		return err2
 	}
@@ -187,13 +209,14 @@ func (o *Scanner) Walk(pth string, info os.FileInfo, err error) error {
 		pth = p
 	}
 
+	o.ScanInvisible(pth, info)
+	o.ScanHome(pth, info)
 	o.ScanEtcSSH(pth, info)
 	o.ScanUserSSH(pth, info)
 	o.ScanSSHConfig(pth, info)
 	o.ScanSSHKeys(pth, info)
 	o.ScanSSHAuthorizedKeys(pth, info)
 	o.ScanSSHKnownHosts(pth, info)
-	o.ScanHome(pth, info)
 	return nil
 }
 
