@@ -70,7 +70,7 @@ To scan your live SSH directory tree:
 $ sunshine ~/.ssh
 ```
 
-Some very poorly configured paths may not be visible to the user account running sunshine. To check for paths missing chmod u+x (directories) or chmod u+r (files), run sunshine with root privileges:
+Some paths may not be fully visible to the user account running sunshine. To check for paths missing chmod u+r or u+x (directories) or paths missing chmod u+r (files), run sunshine with root privileges:
 
 ```console
 $ sudo sunshine
