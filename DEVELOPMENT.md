@@ -33,7 +33,7 @@ $ mage uninstall
 $ mage lint
 ```
 
-# TEST
+# INTEGRATION TEST
 
 ```console
 $ mage test

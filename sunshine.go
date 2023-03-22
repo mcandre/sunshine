@@ -15,7 +15,7 @@ import (
 var SSHKeyPattern = regexp.MustCompile("^id_.+$")
 
 // SSHPublicKeyPattern matches SSH public key filenames.
-var SSHPublicKeyPattern = regexp.MustCompile("^id_.+\\.pub$")
+var SSHPublicKeyPattern = regexp.MustCompile(`^id_.+\.pub$`)
 
 // Scanner collects warnings.
 type Scanner struct {
@@ -51,17 +51,17 @@ func NewScanner(debug bool) (*Scanner, error) {
 	errCh := make(chan error)
 	doneCh := make(chan struct{})
 	scanner := Scanner{
-		Debug: debug,
+		Debug:   debug,
 		DebugCh: debugCh,
-		WarnCh: warnCh,
-		ErrCh: errCh,
-		DoneCh: doneCh,
-		Home: home,
+		WarnCh:  warnCh,
+		ErrCh:   errCh,
+		DoneCh:  doneCh,
+		Home:    home,
 	}
 	return &scanner, nil
 }
 
-// ChecknFileExists checks paths for existence.
+// CheckFileExists checks paths for existence.
 func (o Scanner) CheckFileExists(pth string, info os.FileInfo) error {
 	_, err := os.Stat(pth)
 
@@ -99,12 +99,12 @@ func (o *Scanner) ValidateChmod(pth string, info os.FileInfo, expectedMode os.Fi
 func (o *Scanner) ValidateChmodMask(pth string, info os.FileInfo, expectedMask os.FileMode) {
 	observedMode := info.Mode() % 01000
 
-	if expectedMask & observedMode == 0 {
+	if expectedMask&observedMode == 0 {
 		o.WarnCh <- fmt.Sprintf("%s: expected chmod mask to union with %04o, got %04o", pth, expectedMask, observedMode)
 	}
 }
 
-// ScanInsible analyzes paths for missing u+x (directories) or u+r (files) bits.
+// ScanInvisible analyzes paths for missing u+x (directories) or u+r (files) bits.
 func (o Scanner) ScanInvisible(pth string, info os.FileInfo) {
 	if info.IsDir() {
 		o.ValidateChmodMask(pth, info, 0500)
@@ -121,7 +121,7 @@ func (o Scanner) ScanEtcSSH(pth string, info os.FileInfo) {
 	}
 }
 
-// ScanSSH analyzes .ssh directories.
+// ScanUserSSH analyzes .ssh directories.
 func (o Scanner) ScanUserSSH(pth string, info os.FileInfo) {
 	if info.Name() == ".ssh" {
 		o.ValidateDirectory(pth, info)
@@ -199,7 +199,7 @@ func (o *Scanner) Walk(pth string, info os.FileInfo, err error) error {
 		return err2
 	}
 
-	if info.Mode() & os.ModeSymlink != 0 {
+	if info.Mode()&os.ModeSymlink != 0 {
 		p, err3 := os.Readlink(pth)
 
 		if err3 != nil {
@@ -244,7 +244,7 @@ func Illuminate(roots []string, debug bool) (*Scanner, error) {
 
 	go func() {
 		wg.Wait()
-		scanner.DoneCh<-struct{}{}
+		scanner.DoneCh <- struct{}{}
 	}()
 
 	return scanner, nil
