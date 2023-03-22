@@ -1,4 +1,4 @@
 package sunshine
 
 // Version is semver.
-const Version = "0.0.5"
+const Version = "0.0.6"
