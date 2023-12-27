@@ -39,17 +39,17 @@ https://github.com/mcandre/sunshine/releases
 $ go install github.com/mcandre/sunshine/cmd/sunshine@latest
 ```
 
+# LICENSE
+
+BSD-2-Clause
+
 # RUNTIME REQUIREMENTS
 
-None
+(None)
 
 # CONTRIBUTING
 
 For more information on developing tug itself, see [DEVELOPMENT.md](DEVELOPMENT.md).
-
-# LICENSE
-
-BSD-2-Clause
 
 # USAGE
 
