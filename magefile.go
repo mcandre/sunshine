@@ -77,9 +77,9 @@ func Unmake() error {
 // Lint runs the lint suite.
 func Lint() error {
 	mg.Deps(Deadcode)
-	mg.Deps(GoVet)
 	mg.Deps(GoFmt)
 	mg.Deps(GoImports)
+	mg.Deps(GoVet)
 	mg.Deps(Errcheck)
 	mg.Deps(Nakedret)
 	mg.Deps(Shadow)
