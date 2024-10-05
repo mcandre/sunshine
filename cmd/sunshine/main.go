@@ -1,3 +1,4 @@
+// Package main implements a CLI application to lint file permissions.
 package main
 
 import (

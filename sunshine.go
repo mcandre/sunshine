@@ -1,3 +1,4 @@
+// Package sunshine implements primitives to analyze file permissions.
 package sunshine
 
 import (
@@ -62,7 +63,7 @@ func NewScanner(debug bool) (*Scanner, error) {
 }
 
 // CheckFileExists checks paths for existence.
-func (o Scanner) CheckFileExists(pth string, info os.FileInfo) error {
+func (o Scanner) CheckFileExists(pth string, _ os.FileInfo) error {
 	_, err := os.Stat(pth)
 
 	if errors.Is(err, os.ErrNotExist) {
@@ -186,7 +187,7 @@ func (o Scanner) ScanHome(pth string, info os.FileInfo) {
 
 // Walk traverses a file path recursively,
 // collecting known permission discrepancies.
-func (o *Scanner) Walk(pth string, info os.FileInfo, err error) error {
+func (o *Scanner) Walk(pth string, info os.FileInfo, _ error) error {
 	if o.Debug {
 		o.DebugCh <- fmt.Sprintf("scanning: %s", pth)
 	}
@@ -195,15 +196,15 @@ func (o *Scanner) Walk(pth string, info os.FileInfo, err error) error {
 		return fmt.Errorf("%s: access denied", pth)
 	}
 
-	if err2 := o.CheckFileExists(pth, info); err2 != nil {
-		return err2
+	if err := o.CheckFileExists(pth, info); err != nil {
+		return err
 	}
 
 	if info.Mode()&os.ModeSymlink != 0 {
-		p, err3 := os.Readlink(pth)
+		p, err2 := os.Readlink(pth)
 
-		if err3 != nil {
-			return err3
+		if err2 != nil {
+			return err2
 		}
 
 		pth = p
