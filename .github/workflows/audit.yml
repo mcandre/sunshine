@@ -17,8 +17,7 @@ jobs:
       with:
         go-version: "1.24.6"
     - name: "provision dev tools"
-      run: "make -j 4"
-
+      run: "./install"
     - name: "install snyk"
       run: |
         curl -LO https://downloads.snyk.io/cli/stable/snyk-linux
